@@ -15,7 +15,9 @@ import { clickdate } from '../../directives/clickdate.js';
 import { Popup } from '@svar-ui/react-core';
 import Headers from './Headers.jsx';
 import SectionContent from './SectionContent.jsx';
-import { useEventOverlay } from './useEventOverlay.jsx';
+import EventProjection from './EventProjection.jsx';
+import { resolveEventPosition } from './resolveEventPosition.js';
+import { useEventOverlay } from '../useEventOverlay.jsx';
 import './Sections.css';
 
 const scope = 'wx-aacpUHlw';
@@ -34,19 +36,22 @@ function getMinContentHeight(section) {
     : 0;
 }
 
-function getBarSectionHeight(section) {
+function getBarSectionHeight(section, hasProjection) {
   if (section.mode !== 'bars' || typeof section.size === 'number') return 0;
   let maxLanes = 0;
   for (const p of section.primitives) {
     const lanes = p.totalLanes ?? 1;
     if (lanes > maxLanes) maxLanes = lanes;
   }
+  if (!maxLanes && hasProjection) {
+    maxLanes = 1;
+  }
   return maxLanes * BAR_LANE_HEIGHT;
 }
 
-function sectionMinHeight(section) {
+function sectionMinHeight(section, hasProjection) {
   if (typeof section.size !== 'number') {
-    return getBarSectionHeight(section);
+    return getBarSectionHeight(section, hasProjection);
   }
   return getMinContentHeight(section);
 }
@@ -80,14 +85,15 @@ function SectionRow({
   viewValue,
   overlay,
   eventPopup,
+  projection,
 }) {
   const sticky = idx < stickyCount;
   const secDx = (sizes[section.name]?.width ?? 0) / 100;
   const containerHeight = sizes[section.name]?.height ?? 0;
   const minHeight = getMinContentHeight(section);
-  const barHeight = getBarSectionHeight(section);
+  const barHeight = getBarSectionHeight(section, !!projection);
   const secDy = Math.max(containerHeight, minHeight, barHeight) / 100;
-  const minH = sectionMinHeight(section);
+  const minH = sectionMinHeight(section, !!projection);
 
   const contentRef = useRef(null);
   const dragRef = useRef(null);
@@ -168,7 +174,9 @@ function SectionRow({
     scope,
     idx === visibleSectionsLength - 1 ? 'wx-section-last' : '',
     sticky ? 'wx-section-sticky' : '',
-    section.mode === 'grid' && gridOverflow ? 'wx-section-grid' : '',
+    section.mode === 'grid' && !!gridOverflow[section.name]
+      ? 'wx-section-grid'
+      : '',
     hasYHeaders ? 'wx-has-y-headers' : '',
   ]
     .filter(Boolean)
@@ -224,8 +232,19 @@ function SectionRow({
           eventContent={eventContent}
           view={view}
           tooltip={tooltip}
-          onoverflow={section.mode === 'grid' ? onGridOverflow : undefined}
+          onoverflow={
+            section.mode === 'grid'
+              ? (overflow) => onGridOverflow(section.name, overflow)
+              : undefined
+          }
         />
+        {projection && (
+          <EventProjection
+            primitives={projection.primitives}
+            dx={secDx}
+            dy={secDy}
+          />
+        )}
       </div>
     </div>
   );
@@ -240,6 +259,7 @@ function Sections({
   tooltip,
   eventPopup,
   readonly = false,
+  eventProjection,
 }) {
   const api = useContext(store);
   const viewValue = useStore(api, '_view');
@@ -247,7 +267,7 @@ function Sections({
   const [ready, setReady] = useState(false);
   const [sizes, setSizes] = useState({});
   const [xHeadersHeight, setXHeadersHeight] = useState(0);
-  const [gridOverflow, setGridOverflow] = useState(false);
+  const [gridOverflow, setGridOverflow] = useState({});
 
   const sectionElsRef = useRef({});
   const contentElsRef = useRef({});
@@ -311,16 +331,68 @@ function Sections({
     measure();
   }, [ready, data, measure, observeAll]);
 
-  const onGridOverflow = useCallback((overflow) => {
-    setGridOverflow(overflow);
+  const onGridOverflow = useCallback((section, overflow) => {
+    setGridOverflow((prev) => {
+      if (!!prev[section] === overflow) return prev;
+      return { ...prev, [section]: overflow };
+    });
   }, []);
 
-  const visibleSections = useMemo(
+  // Sections visible without taking the event projection into account.
+  // Svelte resolves the projection <-> visibility cycle lazily; React memos
+  // cannot, so the base list is computed first and used to place the projection.
+  const baseSections = useMemo(
     () =>
       data.filter(
         (s) => s.size !== 'content-optional' || s.primitives.length > 0,
       ),
     [data],
+  );
+
+  const projections = useMemo(() => {
+    if (!eventProjection || !eventProjection.htmlEvent) return [];
+    let event;
+    for (const item of baseSections) {
+      const size = sizes[item.name];
+      const itemDx = (size?.width ?? 0) / 100;
+      const itemDy =
+        Math.max(
+          size?.height ?? 0,
+          getMinContentHeight(item),
+          getBarSectionHeight(item),
+        ) / 100;
+      event = resolveEventPosition(
+        eventProjection.htmlEvent,
+        eventProjection.event,
+        item,
+        contentElsRef.current[item.name],
+        itemDx,
+        itemDy,
+        viewValue,
+        document,
+      );
+      if (event) break;
+    }
+    if (!event) return [];
+    // store calculated props on the original projection object
+    Object.assign(eventProjection.event, event);
+    return viewValue.projectEvent(event);
+  }, [eventProjection, baseSections, sizes, viewValue, ready]);
+
+  const projectionFor = useCallback(
+    (section) => projections.find((item) => item.section === section),
+    [projections],
+  );
+
+  const visibleSections = useMemo(
+    () =>
+      data.filter(
+        (s) =>
+          s.size !== 'content-optional' ||
+          s.primitives.length > 0 ||
+          !!projectionFor(s.name),
+      ),
+    [data, projectionFor],
   );
 
   const stickyCount = useMemo(() => {
@@ -405,6 +477,7 @@ function Sections({
           viewValue={viewValue}
           overlay={overlay}
           eventPopup={eventPopup}
+          projection={projectionFor(section.name)}
         />
       ))}
 

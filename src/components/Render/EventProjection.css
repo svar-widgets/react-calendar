@@ -1,0 +1,21 @@
+.wx-event-placeholders.wx-aaaZjSFb {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.wx-event-placeholder.wx-aaaZjSFb {
+  position: absolute;
+  box-sizing: border-box;
+  min-width: 2px;
+  min-height: 2px;
+  border: 2px solid var(--wx-color-primary);
+  border-radius: var(--wx-border-radius);
+  background: color-mix(
+    in srgb,
+    var(--wx-color-primary) 20%,
+    var(--wx-background) 30%,
+    transparent
+  );
+}

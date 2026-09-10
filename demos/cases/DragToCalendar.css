@@ -1,0 +1,48 @@
+.demo.wx-aadkIHZO {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.tasks.wx-aadkIHZO {
+  width: 220px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+}
+.tasks.wx-aadkIHZO h4 {
+  margin: 0;
+}
+.hint.wx-aadkIHZO {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--wx-color-font-alt);
+}
+.task.wx-aadkIHZO {
+  border: var(--wx-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: var(--wx-background);
+  color: var(--wx-color-font);
+  cursor: grab;
+  box-shadow: var(--wx-shadow-light);
+  user-select: none;
+}
+.task.wx-aadkIHZO:active {
+  cursor: grabbing;
+}
+.task-title.wx-aadkIHZO {
+  font-weight: 600;
+}
+.task-duration.wx-aadkIHZO {
+  font-size: 12px;
+  color: var(--wx-color-font-alt);
+  margin-top: 2px;
+}
+.calendar-box.wx-aadkIHZO {
+  flex: 1 1 auto;
+  min-width: 0;
+}

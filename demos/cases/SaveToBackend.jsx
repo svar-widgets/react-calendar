@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, Editor } from '../../src/';
-import { RestDataProvider } from '@svar-ui/calendar-provider';
+import { Calendar, Editor, RestDataProvider } from '../../src/';
 
 const server = 'https://calendar-backend.svar.dev';
 

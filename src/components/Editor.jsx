@@ -1,22 +1,25 @@
-import { useState, useMemo, useContext } from 'react';
+import { useMemo, useContext } from 'react';
 import { Editor as EditorBase, registerEditorItem } from '@svar-ui/react-editor';
 import { useStore } from '@svar-ui/lib-react';
 import { locale } from '@svar-ui/lib-dom';
 import { en } from '@svar-ui/calendar-locales';
 import { en as coreEn } from '@svar-ui/core-locales';
 import { context } from '@svar-ui/react-core';
+import store from '../context.js';
 import DateTimePicker from './DateTimePicker.jsx';
-import { getEditorItems } from './editorItems.js';
+import EventDatesForm from './EventDatesForm.jsx';
+import { getEditorItems } from '../defaults.js';
 
 import './Editor.css';
 
 registerEditorItem('date-time-picker', DateTimePicker);
+registerEditorItem('event-dates', EventDatesForm);
 
 export default function Editor({
   api,
   values,
-  items = getEditorItems(),
-  placement = 'sidebar',
+  items,
+  placement,
   layout = 'default',
   focus = true,
   css = '',
@@ -49,20 +52,29 @@ export default function Editor({
     });
   }
 
-  const [generation, setGeneration] = useState(1);
-
-  const allDay = useMemo(
-    () => (generation > 0 ? editorDataValue?.allDay : false),
-    [generation, editorDataValue],
+  const calendarCtx = useContext(store);
+  const finalPlacement = useMemo(
+    () => placement ?? (calendarCtx?.isCompact?.() ? 'fullscreen' : 'sidebar'),
+    [placement, calendarCtx],
   );
 
-  const cItems = useMemo(() => applyLocale(items), [items, _]);
+  const useRecurringForm = useMemo(
+    () =>
+      !!editorDataValue?.recurring &&
+      (editorDataValue?.recurringMode ?? 'series') !== 'single',
+    [editorDataValue],
+  );
+
+  const cItems = useMemo(
+    () => applyLocale(items ?? getEditorItems(useRecurringForm)),
+    [items, useRecurringForm, _],
+  );
 
   function handleDelete() {
     const data = editorDataValue;
     if (!data) return;
-    api.exec('delete-event', { id: data.id });
-    api.exec('select-event', { id: null });
+    api.exec('delete-event', { id: data.id, rawId: data.rawId });
+    api.exec('select-event', { id: null, rawId: null });
   }
 
   const defaultTopBar = {
@@ -82,51 +94,26 @@ export default function Editor({
   const editorTopBar = topBar === undefined ? defaultTopBar : topBar;
 
   const editorCss = useMemo(
-    () =>
-      ['wx-editor-calendar', allDay ? 'wx-editor-all-day' : '', css]
-        .filter(Boolean)
-        .join(' '),
-    [allDay, css],
+    () => ['wx-editor-calendar', css].filter(Boolean).join(' '),
+    [css],
   );
-
-  function sameDay(a, b) {
-    return (
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate()
-    );
-  }
 
   function handleSave(ev) {
     onSave?.(ev);
     const data = editorDataValue;
     if (!data) return;
-    api.exec('update-event', { id: data.id, event: { ...ev.values } });
+    const mode = data.recurringMode ?? 'series';
+    // a series save must not carry the clicked occurrence's context in
+    // rawId, or the store would treat it as a single-occurrence edit
+    api.exec('update-event', {
+      id: data.id,
+      rawId: mode === 'series' ? data.id : data.rawId,
+      event: { ...ev.values },
+      ...(data.recurringOriginalDate && mode !== 'series' ? { mode } : {}),
+    });
   }
 
   function handleChange(ev) {
-    const { key, value, update } = ev;
-    const prev = editorDataValue;
-    setGeneration((g) => g + 1);
-
-    if (prev && key === 'start' && !update.allDay) {
-      const oldStart = prev.start;
-      const oldEnd = prev.end;
-      if (
-        oldStart instanceof Date &&
-        oldEnd instanceof Date &&
-        sameDay(oldStart, oldEnd) &&
-        value instanceof Date
-      ) {
-        const newEnd = new Date(oldEnd);
-        newEnd.setFullYear(
-          value.getFullYear(),
-          value.getMonth(),
-          value.getDate(),
-        );
-        update.end = newEnd;
-      }
-    }
     onChange?.(ev);
   }
 
@@ -134,7 +121,7 @@ export default function Editor({
     onAction?.(ev);
     const { item } = ev;
     if (item.id === 'close' && !!item.comp) {
-      api.exec('select-event', { id: null });
+      api.exec('select-event', { id: null, rawId: null });
     }
   }
 
@@ -149,9 +136,9 @@ export default function Editor({
         onChange={handleChange}
         onAction={handleAction}
         onSave={handleSave}
-        placement={placement}
+        placement={finalPlacement}
         layout={layout}
-        values={editorDataValue}
+        values={editorDataValue.values}
         css={editorCss}
       />
     )
