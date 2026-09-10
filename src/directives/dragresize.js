@@ -1,3 +1,5 @@
+import { decodeId } from '@svar-ui/calendar-store';
+
 const DRAG_THRESHOLD = 3;
 
 export function startResize(node, dragEl, e, eventId, opts) {
@@ -39,7 +41,8 @@ export function startResize(node, dragEl, e, eventId, opts) {
     const finalBottom =
       origTop + (parseFloat(dragEl.style.height) || dragEl.offsetHeight);
 
-    const original = opts.getEvent(eventId);
+    const eventInfo = decodeId(eventId);
+    const original = opts.getEvent(eventInfo.id);
     if (original) {
       const finalLeft = parseFloat(dragEl.style.left) || 0;
       const x100 =
@@ -56,10 +59,11 @@ export function startResize(node, dragEl, e, eventId, opts) {
 
       if (endPartial.end instanceof Date) {
         const payload = {
-          id: original.id,
+          id: eventInfo.id,
+          rawId: eventId,
           event: { end: endPartial.end },
         };
-        opts.exec('update-event', payload);
+        opts.exec('move-event', payload);
       }
     }
 

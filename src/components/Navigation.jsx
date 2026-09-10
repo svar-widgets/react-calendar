@@ -1,5 +1,5 @@
 import { useContext, useMemo } from 'react';
-import { Toolbar, registerToolbarItem } from '@svar-ui/react-toolbar';
+import { Toolbar, registerToolbarItem, ButtonList } from '@svar-ui/react-toolbar';
 import { RichSelect, Segmented } from '@svar-ui/react-core';
 import { getToolbarItems } from '@svar-ui/calendar-store';
 import { useStore } from '@svar-ui/lib-react';
@@ -14,7 +14,12 @@ import AddEventButton from './AddEventButton.jsx';
 import './Navigation.css';
 
 registerToolbarItem('richselect', RichSelect);
+registerToolbarItem('richselect-navigation', RichSelect);
+registerToolbarItem('richselect-navigation', ButtonList, { menu: true });
 registerToolbarItem('segmented', Segmented);
+registerToolbarItem('segmented-navigation', Segmented);
+registerToolbarItem('segmented-navigation', ButtonList, { menu: true });
+registerToolbarItem('segmented', ButtonList, { menu: true });
 registerToolbarItem('dateNav', DateNav);
 registerToolbarItem('todayButton', TodayButton);
 registerToolbarItem('dateLabel', DateLabel);
@@ -23,8 +28,9 @@ registerToolbarItem('addEventButton', AddEventButton);
 
 export default function Navigation({
   views,
-  toolbar = { items: getToolbarItems() },
+  toolbar,
   readonly = false,
+  history = false,
 }) {
   const api = useContext(store);
   const locale = useContext(context.i18n);
@@ -32,8 +38,10 @@ export default function Navigation({
 
   const currentViewValue = useStore(api, 'currentView');
 
+  let historyState = null;
+
   const items = useMemo(() => {
-    const base = toolbar?.items;
+    const base = toolbar ? toolbar.items : getToolbarItems({ history });
     const viewOptions = views.map((v) => ({
       id: v.id,
       label: _(v.label || v.id.charAt(0).toUpperCase() + v.id.slice(1)),
@@ -41,29 +49,47 @@ export default function Navigation({
 
     const res = [...(base ?? [])]
       .map((item) => {
-        if (item.id === 'modes') {
+        const next = item;
+        if (next.id === 'modes') {
           if (viewOptions.length > 1) {
             return {
-              ...item,
+              ...next,
               value: currentViewValue,
               options: viewOptions,
             };
           } else {
             return null;
           }
-        }
-        if (readonly && item.comp === 'addEventButton') return null;
-        return item;
+        } else if (!readonly) {
+        } else if (
+          next.comp === 'addEventButton' ||
+          next.id === 'undo' ||
+          next.id === 'redo'
+        )
+          return null;
+
+        return next;
       })
       .filter(Boolean);
     return res;
-  }, [toolbar, views, currentViewValue, readonly, _]);
+  }, [
+    toolbar,
+    views,
+    currentViewValue,
+    readonly,
+    history,
+    historyState,
+    api,
+    _,
+  ]);
 
   const onChange = ({ item, value }) => {
     if (item.id === 'modes') {
       api.exec('navigate-to', { view: value });
     }
   };
+
+  if (!items.length) return null;
 
   return (
     <div

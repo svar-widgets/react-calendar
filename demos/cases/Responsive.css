@@ -1,0 +1,17 @@
+.responsive.wx-aac7T7zN {
+  height: 100%;
+}
+.responsive.wx-aac7T7zN .toolbar {
+  margin: 10px 0 0 10px;
+}
+.responsive.wx-aac7T7zN .wrapper {
+  border: var(--wx-border);
+  border-width: 16px;
+  border-radius: 16px;
+  margin: 10px;
+  box-sizing: border-box;
+  flex: 0;
+}
+.responsive.wx-aac7T7zN .size-mobile {
+  max-width: 480px;
+}

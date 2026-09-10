@@ -1,6 +1,6 @@
 {
 	"name": "@svar-ui/react-calendar",
-	"version": "2.6.1",
+	"version": "2.7.0",
 	"description": "A customizable, high-performance React Calendar component",
 	"productTag": "calendar",
 	"productTrial": true,
@@ -12,6 +12,7 @@
 		"build": "vite build",
 		"build:demo": "BUILD_DEMOS=true vite build",
 		"build:full-css": "BUILD_FULL_CSS=true vite build",
+		"build:export": "vite build --mode export",
 		"lint": "eslint . --report-unused-disable-directives",
 		"preview": "vite preview",
 		"prepare": "husky",
@@ -43,17 +44,17 @@
 		"react-dom": ">=18"
 	},
 	"dependencies": {
-		"@svar-ui/calendar-ical": "2.6.0",
-		"@svar-ui/calendar-locales": "2.6.0",
-		"@svar-ui/calendar-store": "2.6.0",
-		"@svar-ui/calendar-provider": "2.6.0",
-		"@svar-ui/lib-dom": "0.12.2",
-		"@svar-ui/lib-react": "1.3.0",
-		"@svar-ui/lib-state": "1.9.6",
-		"@svar-ui/react-core": "2.5.1",
-		"@svar-ui/react-editor": "2.5.0",
-		"@svar-ui/react-menu": "2.5.1",
-		"@svar-ui/react-toolbar": "2.5.1"
+		"@svar-ui/calendar-ical": "2.7.0",
+		"@svar-ui/calendar-locales": "2.7.0",
+		"@svar-ui/calendar-store": "2.7.0",
+		"@svar-ui/calendar-provider": "2.7.0",
+		"@svar-ui/lib-dom": "0.14.0",
+		"@svar-ui/lib-react": "1.3.1",
+		"@svar-ui/lib-state": "1.9.7",
+		"@svar-ui/react-core": "2.6.1",
+		"@svar-ui/react-editor": "2.7.0",
+		"@svar-ui/react-menu": "2.6.1",
+		"@svar-ui/react-toolbar": "2.6.1"
 	},
 	"homepage": "https://svar.dev/react/calendar/",
 	"repository": {
@@ -68,9 +69,12 @@
 		"@types/react-dom": "18.2.22",
 		"@vitejs/plugin-react": "5.0.2",
 		"@svar-ui/react-layout": "2.5.0",
-		"@svar-ui/react-comments": "2.5.1",
-		"@svar-ui/react-tasklist": "2.5.1",
-		"@svar-ui/react-filter": "2.5.0",
+		"@svar-ui/react-comments": "2.6.0",
+		"@svar-ui/react-tasklist": "2.6.0",
+		"@svar-ui/react-filter": "2.6.0",
+		"@svar-ui/react-export-popup": "2.6.0",
+		"@svar-ui/react-excel-import": "2.6.0",
+		"xlsx-writer-lite": "0.3.0",
 		"eslint": "9.35.0",
 		"eslint-plugin-react": "7.37.5",
 		"eslint-plugin-react-hooks": "5.2.0",
@@ -95,5 +99,6 @@
 		"*.{css,md,json}": [
 			"prettier --write"
 		]
-	}
+	},
+	"packageManager": "npm@12.0.2"
 }

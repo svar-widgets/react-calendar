@@ -1,0 +1,30 @@
+.wx-event-dates.wx-aaen7vKW {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wx-padding);
+}
+
+.wx-date-row.wx-aaen7vKW {
+  display: flex;
+  align-items: center;
+  gap: var(--wx-padding);
+}
+
+.wx-date-label.wx-aaen7vKW {
+  flex: none;
+  width: 72px;
+}
+
+.wx-date-control.wx-aaen7vKW {
+  flex: 1;
+  min-width: 0;
+}
+
+.wx-time-control.wx-aaen7vKW {
+  flex: none;
+  width: 96px;
+}
+
+.wx-error.wx-aaen7vKW .wx-input {
+  border-color: var(--wx-color-danger);
+}

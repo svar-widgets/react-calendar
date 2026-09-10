@@ -1,5 +1,6 @@
 import { startResize } from './dragresize.js';
 import { getID } from '@svar-ui/lib-dom';
+import { decodeId } from '@svar-ui/calendar-store';
 
 const MOVE_THRESHOLD = 3;
 const CREATE_THRESHOLD = 5;
@@ -87,7 +88,7 @@ export function drag(node, options) {
       const id = getID(moveEl);
       moveEl = null;
       movePending = false;
-      if (!id) return;
+      if (id == null) return;
       startResize(node, el, e, id, {
         dx: opts.dx,
         dy: opts.dy,
@@ -231,8 +232,9 @@ export function drag(node, options) {
       return;
     }
 
-    const eventId = getID(moveEl);
-    const original = opts.getEvent(eventId);
+    const rawId = getID(moveEl);
+    const eventInfo = decodeId(rawId);
+    const original = opts.getEvent(eventInfo.id);
 
     if (!original) {
       resetMove();
@@ -278,10 +280,11 @@ export function drag(node, options) {
         const newEnd = new Date(newStart.getTime() + duration);
 
         const payload = {
-          id: original.id,
+          id: eventInfo.id,
+          rawId,
           event: { start: newStart, end: newEnd },
         };
-        opts.exec('update-event', payload);
+        opts.exec('move-event', payload);
       }
 
       resetMove();
@@ -323,10 +326,11 @@ export function drag(node, options) {
       if (partial.start instanceof Date) {
         partial.end = new Date(partial.start.getTime() + duration);
         const payload = {
-          id: original.id,
+          id: eventInfo.id,
+          rawId,
           event: partial,
         };
-        opts.exec('update-event', payload);
+        opts.exec('move-event', payload);
       }
     }
 

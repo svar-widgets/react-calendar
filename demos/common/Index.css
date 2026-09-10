@@ -232,11 +232,6 @@
   border-bottom: var(--wx-border);
 }
 
-.wx-demos.content h3 {
-  font-size: 18px;
-  margin: 12px 0;
-  font-weight: normal;
-}
 .wx-demos.content .demo-box {
   margin: 20px;
 }
@@ -292,6 +287,11 @@
   font-weight: 500;
 }
 
+.wx-demos.demo.wip,
+.wx-demos.demo.wip:hover {
+  background-color: #ddd;
+  color: #aaa;
+}
 .wx-demos.demo .pro {
   color: #087a9f;
   border: 1px solid #087a9f;

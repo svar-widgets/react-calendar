@@ -24,6 +24,7 @@ import store from '../context.js';
 // ui
 import Layout from './Layout.jsx';
 
+
 const camelize = (s) =>
   s
     .split('-')
@@ -42,10 +43,12 @@ const Widget = forwardRef(function Widget(props, ref) {
     eventCss,
     eventContent,
     recurring = false,
+    history = false,
     readonly = false,
     children,
     tooltip,
     eventPopup,
+    eventProjection,
     ...restProps
   } = props;
 
@@ -78,6 +81,7 @@ const Widget = forwardRef(function Widget(props, ref) {
       recurring,
       weekStart: rawLocale?.calendar?.weekStart ?? 1,
       dateFormat: fmt,
+      history,
     });
 
     // define event route
@@ -99,6 +103,7 @@ const Widget = forwardRef(function Widget(props, ref) {
       exec: firstInRoute.exec.bind(firstInRoute),
       getEvent: dataStore.getEvent.bind(dataStore),
       fmt,
+      getBrandmark: () => dataStore.getBrandmark(),
     };
 
     storeRef.current = {
@@ -148,12 +153,20 @@ const Widget = forwardRef(function Widget(props, ref) {
     [api],
   );
 
+
+  const lastOptionsRef = useRef(null);
   const initOnceRef = useRef(0);
   useEffect(() => {
     if (!initOnceRef.current) {
-      if (init) init(api);
+      if (init) {
+        init(api);
+        dataStore.postInit();
+      }
     } else {
-      dataStore.configureViews(viewOptions);
+      if (lastOptionsRef.current !== viewOptions) {
+        lastOptionsRef.current = viewOptions;
+        dataStore.configureViews(viewOptions);
+      }
       dataStore.init({
         currentView: view,
         currentDate: date,
@@ -164,7 +177,10 @@ const Widget = forwardRef(function Widget(props, ref) {
   }, [view, date, events, viewOptions]);
 
   if (initOnceRef.current === 0) {
-    dataStore.configureViews(viewOptions);
+    if (lastOptionsRef.current !== viewOptions) {
+      lastOptionsRef.current = viewOptions;
+      dataStore.configureViews(viewOptions);
+    }
     dataStore.init({
       currentView: view,
       currentDate: date,
@@ -186,6 +202,8 @@ const Widget = forwardRef(function Widget(props, ref) {
           readonly={readonly}
           tooltip={tooltip}
           eventPopup={eventPopup}
+          history={history}
+          eventProjection={eventProjection}
         >
           {children}
         </Layout>

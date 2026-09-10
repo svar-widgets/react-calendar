@@ -28,6 +28,7 @@ const CalendarContextMenu = forwardRef(function CalendarContextMenu(
 ) {
   const menuRef = useRef(null);
   const activeIdRef = useRef(null);
+  const rawIdRef = useRef(null);
 
   let l = useContext(context.i18n);
   if (!l) {
@@ -59,10 +60,10 @@ const CalendarContextMenu = forwardRef(function CalendarContextMenu(
   const cOptions = useMemo(() => getOptions(), [options, _]);
 
   const itemResolver = useCallback(
-    (rawId, ev) => {
-      if (!rawId || !api) return null;
+    (id, ev) => {
+      if (!id || !api) return null;
 
-      const event = api.getEvent(rawId);
+      const event = api.getEvent(id);
       if (!event) return null;
 
       if (resolver) {
@@ -71,6 +72,7 @@ const CalendarContextMenu = forwardRef(function CalendarContextMenu(
       }
 
       activeIdRef.current = event.id;
+      rawIdRef.current = id;
 
       return event;
     },
@@ -83,12 +85,13 @@ const CalendarContextMenu = forwardRef(function CalendarContextMenu(
       if (!action) return;
 
       const activeId = activeIdRef.current;
+      const rawId = rawIdRef.current;
       const id = typeof activeId === 'object' ? activeId.id : activeId;
 
       if (action.id === 'edit-event') {
-        api.exec('select-event', { id });
+        api.exec('select-event', { id, rawId });
       } else if (action.id === 'delete-event') {
-        api.exec('delete-event', { id });
+        api.exec('delete-event', { id, rawId });
       }
 
       onClick?.(ev);

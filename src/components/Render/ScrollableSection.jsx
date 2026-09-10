@@ -15,7 +15,9 @@ import { clickevent } from '../../directives/clickevent.js';
 import { clickdate } from '../../directives/clickdate.js';
 import Headers from './Headers.jsx';
 import SectionContent from './SectionContent.jsx';
-import { useEventOverlay } from './useEventOverlay.jsx';
+import EventProjection from './EventProjection.jsx';
+import { resolveEventPosition } from './resolveEventPosition.js';
+import { useEventOverlay } from '../useEventOverlay.jsx';
 import './ScrollableSection.css';
 
 const scope = 'wx-aacAsb1k';
@@ -29,6 +31,7 @@ export default function ScrollableSection({
   tooltip,
   eventPopup,
   readonly = false,
+  eventProjection,
 }) {
   const api = useContext(store);
   const viewValue = useStore(api, '_view');
@@ -89,6 +92,27 @@ export default function ScrollableSection({
     const v = inner[0].ui?.minUnitHeight;
     return typeof v === 'number' ? inner.length * v : 0;
   }, [yHeaders]);
+
+  // `ready` is in the deps so the memo re-runs once contentRef is populated
+  const projection = useMemo(() => {
+    if (!eventProjection || !eventProjection.htmlEvent) return null;
+    const event = resolveEventPosition(
+      eventProjection.htmlEvent,
+      eventProjection.event,
+      section,
+      contentRef.current,
+      dx,
+      dy,
+      viewValue,
+      document,
+    );
+    if (!event) return null;
+    // store calculated props on the original projection object
+    Object.assign(eventProjection.event, event);
+    return viewValue
+      .projectEvent(event)
+      .find((item) => item.section === section.name);
+  }, [eventProjection, section, dx, dy, viewValue, ready]);
 
   const overlay = useEventOverlay(
     useCallback((id) => api.getEvent(id), [api]),
@@ -211,18 +235,27 @@ export default function ScrollableSection({
             ></div>
           )}
           {section && (
-            <SectionContent
-              section={section}
-              dx={dx}
-              dy={dy}
-              scrollHeight={null}
-              measured={ready && contentWidth > 0 && contentHeight > 0}
-              cellCss={cellCss}
-              eventCss={eventCss}
-              eventContent={eventContent}
-              view={view}
-              tooltip={tooltip}
-            />
+            <>
+              <SectionContent
+                section={section}
+                dx={dx}
+                dy={dy}
+                scrollHeight={null}
+                measured={ready && contentWidth > 0 && contentHeight > 0}
+                cellCss={cellCss}
+                eventCss={eventCss}
+                eventContent={eventContent}
+                view={view}
+                tooltip={tooltip}
+              />
+              {projection && (
+                <EventProjection
+                  primitives={projection.primitives}
+                  dx={dx}
+                  dy={dy}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

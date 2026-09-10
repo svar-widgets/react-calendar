@@ -105,7 +105,9 @@ function DemoExplorerContent({
                     key={data[0]}
                     to={data[0].replace(':skin', skin)}
                     className={({ isActive }) =>
-                      `wx-demos demo ${isActive ? 'active' : ''}`
+                      `wx-demos demo ${isActive ? 'active' : ''} ${
+                        data[3] && data[3].wip ? 'wip' : ''
+                      }`
                     }
                   >
                     {data[1]}

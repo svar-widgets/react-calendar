@@ -5,6 +5,7 @@ import ContextMenu from './cases/ContextMenu.jsx';
 import Styling from './cases/Styling.jsx';
 import DayView from './cases/DayView.jsx';
 import WeekView from './cases/WeekView.jsx';
+import CombinedScale from './cases/CombinedScale.jsx';
 import MonthView from './cases/MonthView.jsx';
 import Filter from './cases/Filter.jsx';
 import CalendarPanel from './cases/CalendarPanel.jsx';
@@ -14,6 +15,8 @@ import EditorComments from './cases/Editor.jsx';
 import Tooltip from './cases/Tooltip.jsx';
 import EventPopup from './cases/EventPopup.jsx';
 import EventContent from './cases/EventContent.jsx';
+import DragToCalendar from './cases/DragToCalendar.jsx';
+import Responsive from './cases/Responsive.jsx';
 
 
 export const links = [
@@ -27,6 +30,7 @@ export const links = [
         CalendarPanel,
         { file: 'CalendarPanel' },
       ],
+      ['/responsive/:skin', 'Mobile mode', Responsive, { file: 'Responsive' }],
     ],
   },
   {
@@ -79,6 +83,12 @@ export const links = [
         'Saving to Backend',
         SaveToBackend,
         { file: 'SaveToBackend' },
+      ],
+      [
+        '/drag-to-calendar/:skin',
+        'Drag to Calendar',
+        DragToCalendar,
+        { file: 'DragToCalendar' },
       ],
       [
         '/ical/:skin',

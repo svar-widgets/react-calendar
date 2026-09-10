@@ -1,8 +1,13 @@
 .wx-year-grid.wx-aaalPWdG {
   display: grid;
+  grid-template-columns: repeat(var(--wx-year-columns, 3), 1fr);
   gap: 16px;
   padding: 16px;
   position: relative;
+}
+.wx-calendar--compact .wx-year-grid.wx-aaalPWdG {
+  display: flex;
+  flex-direction: column;
 }
 .wx-month-label.wx-aaalPWdG {
   font-weight: var(--wx-font-weight-md);

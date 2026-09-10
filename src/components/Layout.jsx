@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { context } from '@svar-ui/react-core';
 import { useStore } from '@svar-ui/lib-react';
 import Navigation from './Navigation.jsx';
@@ -6,6 +6,8 @@ import Sections from './Render/Sections.jsx';
 import ScrollableSection from './Render/ScrollableSection.jsx';
 
 import './Layout.css';
+
+const COMPACT_WIDTH = 480;
 
 const str2style = (s) => {
   const obj = {};
@@ -29,6 +31,8 @@ function Layout({
   eventPopup,
   brandmark,
   readonly = false,
+  history = false,
+  eventProjection,
 }) {
   const locale = useContext(context.i18n);
   const _ = locale.getGroup('eventCalendar');
@@ -38,6 +42,26 @@ function Layout({
   const viewValue = useStore(store, '_view');
 
   const renderMode = viewValue?.render;
+
+  const rootRef = useRef(null);
+  const isCompactRef = useRef(false);
+
+  store.isCompact = () => isCompactRef.current;
+  store.getRootNode = () => rootRef.current;
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+
+    const observer = new ResizeObserver((entries) => {
+      isCompactRef.current = entries[0].contentRect.width < COMPACT_WIDTH;
+      node.classList.toggle('wx-calendar--compact', isCompactRef.current);
+    });
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [store]);
 
   function viewContent() {
     if (renderMode === 'scrollable') {
@@ -51,6 +75,7 @@ function Layout({
           tooltip={tooltip}
           eventPopup={eventPopup}
           readonly={readonly}
+          eventProjection={eventProjection}
         />
       );
     }
@@ -64,6 +89,7 @@ function Layout({
         tooltip={tooltip}
         eventPopup={eventPopup}
         readonly={readonly}
+        eventProjection={eventProjection}
       />
     );
   }
@@ -73,9 +99,15 @@ function Layout({
       className="wx-calendar wx-aaccgHBn"
       role="region"
       aria-label={_('Calendar')}
+      ref={rootRef}
     >
       {toolbar !== null && (
-        <Navigation views={views} toolbar={toolbar} readonly={readonly} />
+        <Navigation
+          views={views}
+          toolbar={toolbar}
+          readonly={readonly}
+          history={history}
+        />
       )}
       {children ? (
         <div className="wx-layout-content wx-aaccgHBn">

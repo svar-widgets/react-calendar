@@ -45,6 +45,7 @@ function GridSection({
   eventContent,
   view,
   section,
+  eventOverflow = 'more',
   onoverflow,
 }) {
   const [expandedRows, setExpandedRows] = useState(() => new Set());
@@ -71,7 +72,7 @@ function GridSection({
             0,
             Math.floor((groupHeight - moreLabelHeight) / fullLaneHeight),
           );
-      const isExpanded = expandedRows.has(y);
+      const isExpanded = eventOverflow === 'expand' || expandedRows.has(y);
 
       let extraHeight = 0;
       if (isExpanded && info.totalLanes > maxVisible) {
@@ -88,7 +89,7 @@ function GridSection({
     }
 
     return layout;
-  }, [primitives, dy, expandedRows]);
+  }, [primitives, dy, expandedRows, eventOverflow]);
 
   const rowExtraOffsets = useMemo(() => {
     const offsets = new Map();

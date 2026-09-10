@@ -111,7 +111,7 @@ export default function YearSection({
     <>
       <div
         className={`wx-year-grid ${scope}`}
-        style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+        style={{ '--wx-year-columns': columns }}
       >
         {months.map((month) => (
           <div key={month.month} className={`wx-year-month ${scope}`}>
