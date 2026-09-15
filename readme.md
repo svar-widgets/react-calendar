@@ -10,7 +10,7 @@
 
 </div>
 
-[SVAR React Calendar](https://svar.dev/react/calendar/) is a customizable, high-performance React calendar component for event planning and scheduling. It includes multiple built-in calendar views, event edit form, filtering, theming, drag-and-drop interactions, and a flexible API for toolbars and menus.
+[SVAR React Calendar](https://svar.dev/react/calendar/) is a customizable, high-performance React calendar component for event planning and scheduling. It includes multiple built-in calendar views, event edit form, filtering, theming, drag-and-drop interactions, and a flexible API for toolbar and context menu.
 
 The component helps you quickly build modern scheduling interfaces for React applications with minimal setup. Includes TypeScript support and is compatible with React 18+ and Next.js.
 
@@ -23,22 +23,25 @@ The component helps you quickly build modern scheduling interfaces for React app
 - Day, week, and month views
 - Drag-and-drop event move and resize
 - Drag-to-create events in time-grid views
+- Drag external items onto the calendar as events
 - Sidebar or popup event editor
-- Calendar groups sidebar with built-in filtering
+- Multiple calendars with toggleable visibility
 - Context menu support for quick actions
 - Custom toolbar layouts and helper APIs
 - Custom event content, event cards, and tooltips
 - Event filtering with tagged predicates
 - Localization and configurable week start
 - Built-in light and dark themes
-- iCal import/export support
 - Custom view registration for advanced layouts
+- Mobile mode
+- iCal import/export support
+- Import from Excel
 - TypeScript definitions included
 - React 18+ compatible
 
 ### 🚀 PRO Edition
 
-SVAR React Calendar is available in open-source and PRO editions. The PRO build adds advanced scheduling views and recurrence support without changing the component API.
+SVAR React Calendar is available in open-source and PRO editions. The PRO edition adds advanced scheduling views, recurring events, timezone support, dynamic loading, and more – all without changing the component API.
 
 PRO features include:
 
@@ -46,7 +49,13 @@ PRO features include:
 - Year view
 - Resources view
 - Timeline view
-- Recurring events with RRULE expansion
+- Multi-resource events
+- Combined scales for Resource view
+- Editable recurring events
+- Timezone support
+- Dynamic loading
+- Undo/redo support
+- Export to PDF, PNG, and Excel
 
 Visit the [pricing page](https://svar.dev/react/calendar/pricing/) for licensing details, feature comparison, and free trial.
 
@@ -58,7 +67,7 @@ Import the package, pass an `events` array and a `date`, and optionally attach t
 
 ```jsx
 import { useState } from 'react';
-import { Calendar, Editor } from '@svar-ui/react-calendar';
+import { Calendar, Editor, Willow } from '@svar-ui/react-calendar';
 import '@svar-ui/react-calendar/all.css';
 
 const events = [
@@ -80,10 +89,12 @@ export default function App() {
   const [api, setApi] = useState(null);
 
   return (
-    <>
-      <Calendar init={setApi} events={events} date={new Date(2026, 3, 20)} />
-      {api && <Editor api={api} />}
-    </>
+    <div style={{ height: 600 }}>
+      <Willow>
+        <Calendar init={setApi} events={events} date={new Date(2026, 3, 20)} />
+        {api && <Editor api={api} />}
+      </Willow>
+    </div>
   );
 }
 ```

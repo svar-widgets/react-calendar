@@ -33,7 +33,9 @@ function DemoExplorerContent({
 
   const props = matched ? matched[3] || {} : {};
   const name = props.file || matched?.[1] || '';
-  const githubLink = `${baseLink}${name}.jsx`;
+  const githubLink = name.startsWith('pro_')
+    ? `${baseLink}`
+    : `${baseLink}${name}.jsx`;
 
   const handleRouteChange = useCallback((path) => {
     const parts = path.split('/');
